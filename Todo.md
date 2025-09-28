@@ -40,3 +40,5 @@
 7) GET /events (optional but recommended)
    Behavior: Returns the last N processed webhook deliveries for debugging.
    Response: 200 OK → array of { id, event, action, issue_number, timestamp }
+
+8) Add logging
