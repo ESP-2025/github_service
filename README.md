@@ -1,78 +1,179 @@
-## GitHub Service
+# GitHub Service API
 
-Follow the instructions below to set up and run the project.
+A FastAPI wrapper for the GitHub REST API focused on issues management with webhook support.
 
----
+## Features
 
-### 1. Clone the Repository
+- **CRUD Operations for Issues**: Create, read, update, and close issues
+- **Comments Management**: Add comments to issues
+- **Webhook Receiver**: HMAC-validated webhook endpoint for GitHub events
+- **Error Handling**: Proper HTTP status code mapping and error responses
+- **Rate Limit Handling**: Automatic retry-after header handling
+- **OpenAPI 3.1**: Complete API documentation
+- **Docker Support**: Containerized deployment
+- **Comprehensive Testing**: Unit and integration tests
+
+## API Endpoints
+
+### Issues
+- `GET /issues` - List issues with pagination and filtering
+- `GET /issues/{number}` - Get a specific issue
+- `POST /issues` - Create a new issue
+- `PATCH /issues/{number}` - Update an issue (including close)
+- `POST /issues/{number}/comments` - Add a comment to an issue
+
+### Webhooks
+- `POST /webhook` - GitHub webhook receiver with HMAC validation
+- `GET /events` - List processed webhook events
+
+### Health Checks
+- `GET /health` - Health check endpoint
+- `GET /healthz` - Alternative health check endpoint
+
+## Setup
+
+### Environment Variables
+
+Create a `.env` file with the following variables:
 
 ```bash
-git clone https://github.com/ESP-2025/github_service
-cd github_service
+GITHUB_TOKEN=your_github_token_here
+GITHUB_OWNER=your_github_username_or_org
+GITHUB_REPO=your_repository_name
+WEBHOOK_SECRET=your_webhook_secret_here
+PORT=8000
 ```
 
----
+### Installation
 
-### 2. Set Up Environment Variables
+1. **Using pip:**
+```bash
+pip install -r requirements.txt
+```
 
-Rename the `.env.example` file to just `.env` and add your GitHub API Token.
+2. **Using uv (recommended):**
+```bash
+uv sync
+```
 
----
+### Running the Application
 
-### 3. Install Dependencies
+1. **Development mode:**
+```bash
+uvicorn src.main:app --reload --port $PORT
+```
 
-This project uses [uv](https://github.com/astral-sh/uv) for dependency management.
+2. **Production mode:**
+```bash
+uvicorn src.main:app --host 0.0.0.0 --port $PORT
+```
 
-> Note: Dependencies will be automatically installed and synced anytime you run `uv` command.
+3. **Using Docker:**
+```bash
+docker build -t github-service .
+docker run -p 8000:8000 --env-file .env github-service
+```
 
----
+## Testing
 
-### 4. Run the Server
+Run the test suite:
 
 ```bash
-uv run uvicorn src.main:app --reload
+pytest -v
 ```
 
----
+## Usage Examples
 
-### 5. Run Tests with Pytest
-
+### Create an Issue
 ```bash
-uv run pytest
+curl -X POST http://localhost:8000/issues \
+  -H 'Content-Type: application/json' \
+  -d '{"title":"Demo Issue","body":"This is a demo issue","labels":["bug"]}'
 ```
 
----
-
-### 6. Build and Run with Docker
-
-#### Build Docker Image
+### Close an Issue
 ```bash
-docker build -t github_service .
+curl -X PATCH http://localhost:8000/issues/123 \
+  -H 'Content-Type: application/json' \
+  -d '{"state":"closed"}'
 ```
 
-#### Run Docker Container
+### Add a Comment
 ```bash
-docker run --env-file .env -p 8000:8000 github_service
+curl -X POST http://localhost:8000/issues/123/comments \
+  -H 'Content-Type: application/json' \
+  -d '{"body":"This is a comment"}'
 ```
 
----
-
-## Project Structure
-
-```
-src/        # Source code
-tests/      # Test suite
-Dockerfile  # Docker configuration
-pyproject.toml # Python project config
+### List Issues
+```bash
+curl http://localhost:8000/issues?state=open&per_page=10
 ```
 
----
+## API Documentation
+
+Once the server is running, visit:
+- **Swagger UI**: http://localhost:8000/docs
+- **ReDoc**: http://localhost:8000/redoc
+- **OpenAPI JSON**: http://localhost:8000/openapi.json
+
+## Error Handling
+
+The API provides proper HTTP status codes:
+
+- `200` - Success
+- `201` - Created (for new resources)
+- `400` - Bad Request (invalid payload)
+- `401` - Unauthorized (invalid token)
+- `403` - Forbidden
+- `404` - Not Found
+- `422` - Unprocessable Entity (validation errors)
+- `429` - Too Many Requests (rate limited)
+- `503` - Service Unavailable (upstream failures)
+
+## Webhook Configuration
+
+To set up GitHub webhooks:
+
+1. Go to your repository settings
+2. Navigate to "Webhooks"
+3. Add a new webhook with:
+   - **Payload URL**: `https://your-domain.com/webhook`
+   - **Content type**: `application/json`
+   - **Secret**: Use the same value as `WEBHOOK_SECRET`
+   - **Events**: Select "Issues" and "Issue comments"
+
+## Development
+
+### Project Structure
+```
+src/
+├── main.py          # FastAPI application
+├── config.py        # Configuration and environment variables
+├── models.py        # Pydantic models
+└── routes/
+    ├── issues.py    # Issue-related endpoints
+    └── webhooks.py  # Webhook endpoints
+
+tests/
+├── conftest.py      # Test configuration
+├── test_main.py     # Basic app tests
+├── test_issues.py   # Issue endpoint tests
+└── test_webhooks.py # Webhook tests
+```
+
+### Adding New Features
+
+1. Add new endpoints to the appropriate router
+2. Create Pydantic models for request/response validation
+3. Add comprehensive tests
+4. Update the OpenAPI documentation
 
 ## Contributions
 
 | Name    | Contribution                                                                 |
 |---------|-------------------------------------------------------------------------------|
-| Akshata | Initial project scaffolding, pytest setup, `GET /issues`, `GET /issues/{number}` endpoints. |
-| Joshini |                                                                               |
-| Parth   |                                                                               |
-| Sankalp |                                                                               |
+| Akshata | Initial project scaffolding, pytest setup, `GET /issues`, `GET /issues/{number}` endpoints, tests |
+| Joshini | Post & Patch operations, webhooks, handling, tests, Docker setup  |
+| Parth   | webhooks, tests , Documentation, Cache an ETag                              |
+| Sankalp | error handling, tests, OpenAPI contract                                      |

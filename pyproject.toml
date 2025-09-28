@@ -1,16 +1,20 @@
 [project]
 name = "github-service"
 version = "0.1.0"
-description = "Add your description here"
+description = "FastAPI wrapper for GitHub REST API for issues"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "fastapi[standard]>=0.117.1",
+    "httpx>=0.27.0",
+    "pydantic>=2.0.0",
+    "uvicorn[standard]>=0.30.0",
 ]
 
 [dependency-groups]
 dev = [
     "pytest>=8.4.2",
+    "pytest-httpx>=0.28.0",
 ]
 
 [tool.pytest.ini_options]

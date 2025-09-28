@@ -1,3 +1,4 @@
+''' Authored by Joshini M Naagraj '''
 from fastapi.testclient import TestClient
 from src.main import app  # adjust import if your FastAPI app is elsewhere
 
@@ -5,6 +6,7 @@ client = TestClient(app)
 
 ## Authored by Akshata Madavi
 def test_read_root():
+    """Test that the root endpoint returns the expected welcome message."""
     response = client.get("/")
     assert response.status_code == 200
     assert response.json() == {"Hello": "World"}  # adapt to your actual response

@@ -1,17 +1,35 @@
-## Authored by Akshata Madavi
+## Authored by Parth Maradia
 
-FROM python:3.12-slim-trixie
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+FROM python:3.12-slim
 
-# Copy the project into the image
-ADD . /app
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
 
-# Sync the project into a new environment, asserting the lockfile is up to date
+# Set working directory
 WORKDIR /app
-RUN uv sync --locked
+
+# Copy requirements first for better caching
+COPY requirements.txt .
+
+# Install Python dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy the application code
+COPY src/ ./src/
+COPY tests/ ./tests/
+
+# Create non-root user
+RUN useradd --create-home --shell /bin/bash app && chown -R app:app /app
+USER app
 
 # Expose the port the app runs on
 EXPOSE 8000
 
-# Presuming there is a `my_app` command provided by the project
-CMD ["uv", "run", "uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Health check
+HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:8000/health || exit 1
+
+# Run the application
+CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000"]
