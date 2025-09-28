@@ -65,3 +65,14 @@ tests/      # Test suite
 Dockerfile  # Docker configuration
 pyproject.toml # Python project config
 ```
+
+---
+
+## Contributions
+
+| Name    | Contribution                                                                 |
+|---------|-------------------------------------------------------------------------------|
+| Akshata | Initial project scaffolding, `GET /issues`, `GET /issues/{number}` endpoints. |
+| Joshini |                                                                               |
+| Parth   |                                                                               |
+| Sankalp |                                                                               |
