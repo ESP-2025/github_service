@@ -72,7 +72,7 @@ pyproject.toml # Python project config
 
 | Name    | Contribution                                                                 |
 |---------|-------------------------------------------------------------------------------|
-| Akshata | Initial project scaffolding (with pytest), `GET /issues`, `GET /issues/{number}` endpoints. |
+| Akshata | Initial project scaffolding, pytest setup, `GET /issues`, `GET /issues/{number}` endpoints. |
 | Joshini |                                                                               |
 | Parth   |                                                                               |
 | Sankalp |                                                                               |
