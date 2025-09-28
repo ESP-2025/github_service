@@ -6,6 +6,7 @@ from src import config
 
 router = APIRouter()
 
+## Authored by Akshata Madavi
 @router.get("")
 async def get_repo_issues(
 	state: Optional[str] = Query(None, description="Issue state: open, closed, or all"),
@@ -32,6 +33,7 @@ async def get_repo_issues(
 		response.raise_for_status()
 		return response.json()
 	
+## Authored by Akshata Madavi
 @router.get("/{number}")
 async def get_issue(number: int):
     """

@@ -3,6 +3,7 @@ from src.main import app  # adjust import if your FastAPI app is elsewhere
 
 client = TestClient(app)
 
+## Authored by Akshata Madavi
 def test_read_root():
     response = client.get("/")
     assert response.status_code == 200

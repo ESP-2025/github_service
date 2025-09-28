@@ -1,3 +1,5 @@
+''' Authored by Akshata Madavi '''
+
 from fastapi import FastAPI
 
 from src.routes import issues
