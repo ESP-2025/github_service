@@ -9,7 +9,7 @@ WORKDIR /app
 RUN uv sync --locked
 
 # Expose the port the app runs on
-ExPOSE 8000
+EXPOSE 8000
 
 # Presuming there is a `my_app` command provided by the project
 CMD ["uv", "run", "uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000"]

@@ -30,7 +30,7 @@ This project uses [uv](https://github.com/astral-sh/uv) for dependency managemen
 ### 4. Run the Server
 
 ```bash
-uv run uvicorn src.main:app
+uv run uvicorn src.main:app --reload
 ```
 
 ---
