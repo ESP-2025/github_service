@@ -12,3 +12,6 @@ wheels/
 
 # Environment files
 .env
+
+# Personal files
+Notes.md
