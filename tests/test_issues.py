@@ -1,9 +1,6 @@
 ''' Authored by Parth Maradia '''
-import json
 import time
-import pytest
 from fastapi.testclient import TestClient
-from httpx import Response
 from src.main import app
 from src import config
 

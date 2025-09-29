@@ -5,12 +5,11 @@ import hashlib
 import json
 import logging
 from datetime import datetime
-from typing import Dict, List, Optional
+from typing import Dict, List
 from fastapi import APIRouter, Request, HTTPException, status
 from fastapi.responses import Response
 
 from src import config
-from src.models import WebhookEvent
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
