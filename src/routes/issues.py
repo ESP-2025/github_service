@@ -1,12 +1,12 @@
 import httpx
 import time
 import hashlib
-from typing import Optional, List, Dict
+from typing import Optional, Dict
 from fastapi import APIRouter, Query, HTTPException, Response, status, Request
 from fastapi.responses import JSONResponse
 
 from src import config
-from src.models import CreateIssueRequest, UpdateIssueRequest, IssueResponse, CreateCommentRequest, CommentResponse
+from src.models import CreateIssueRequest, UpdateIssueRequest, CreateCommentRequest
 
 router = APIRouter()
 

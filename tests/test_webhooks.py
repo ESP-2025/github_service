@@ -3,7 +3,6 @@
 import json
 import hmac
 import hashlib
-import pytest
 from fastapi.testclient import TestClient
 from src.main import app
 from src import config

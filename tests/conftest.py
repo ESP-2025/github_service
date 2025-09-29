@@ -2,8 +2,6 @@
 
 import sys
 import os
-import pytest
-from unittest.mock import patch
 
 # Set environment variables before any imports
 env_vars = {
