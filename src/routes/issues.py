@@ -16,54 +16,63 @@ etag_cache: Dict[str, str] = {}
 ## Authored by Akshata Madavi
 @router.get("")
 async def get_repo_issues(
-	request: Request,
-	state: Optional[str] = Query(None, description="Issue state: open, closed, or all"),
-	sort: Optional[str] = Query(None, description="Sort field"),
-	direction: Optional[str] = Query(None, description="Sort direction"),
-	per_page: Optional[int] = Query(30, description="Results per page (max 100)"),
-	page: Optional[int] = Query(1, description="Page number")
+    request: Request,
+    state: Optional[str] = Query(None, description="Issue state: open, closed, or all"),
+    sort: Optional[str] = Query(None, description="Sort field"),
+    direction: Optional[str] = Query(None, description="Sort direction"),
+    per_page: Optional[int] = Query(30, description="Results per page (max 100)"),
+    page: Optional[int] = Query(1, description="Page number")
 ):
-	"""Fetch issues from a GitHub repository with pagination and filtering, with ETag caching support."""
-	# Build cache key from parameters
-	cache_key = _build_cache_key("issues", state, sort, direction, per_page, page)
-	
-	# Check for If-None-Match header
-	if_none_match = request.headers.get("If-None-Match")
-	if if_none_match and cache_key in etag_cache and etag_cache[cache_key] == if_none_match:
-		return Response(status_code=304)
-	
-	url = f"https://api.github.com/repos/{config.GITHUB_OWNER}/{config.GITHUB_REPO}/issues"
-	params = {
-		"state": state,
-		"sort": sort,
-		"direction": direction,
-		"per_page": per_page,
-		"page": page
-	}
-	# Remove None values
-	params = {k: v for k, v in params.items() if v is not None}
-	
-	async with httpx.AsyncClient() as client:
-		try:
-			response = await client.get(url, params=params, headers=config.gh_headers())
-			await _handle_github_response(response)
-			issues_data = response.json()
-			# Normalize each issue in the list
-			normalized_issues = [_normalize_issue_response(issue) for issue in issues_data]
-			
-			# Store ETag in cache and return with ETag header
-			etag = response.headers.get("ETag")
-			if etag:
-				etag_cache[cache_key] = etag
-				return JSONResponse(
-					content=normalized_issues,
-					headers={"ETag": etag}
-				)
-			
-			return normalized_issues
-		except httpx.HTTPStatusError as e:
-			await _handle_github_error(e)
-	
+    """Fetch issues from a GitHub repository with pagination and filtering, with ETag caching support."""
+    # Build cache key from parameters
+    cache_key = _build_cache_key("issues", state, sort, direction, per_page, page)
+
+    # Check for If-None-Match header
+    if_none_match = request.headers.get("If-None-Match")
+    if if_none_match and cache_key in etag_cache and etag_cache[cache_key] == if_none_match:
+        return Response(status_code=304)
+
+    url = f"https://api.github.com/repos/{config.GITHUB_OWNER}/{config.GITHUB_REPO}/issues"
+    params = {
+        "state": state,
+        "sort": sort,
+        "direction": direction,
+        "per_page": per_page,
+        "page": page
+    }
+    # Remove None values
+    params = {k: v for k, v in params.items() if v is not None}
+
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.get(url, params=params, headers=config.gh_headers())
+            await _handle_github_response(response)
+            issues_data = response.json()
+            # Normalize each issue in the list
+            normalized_issues = [_normalize_issue_response(issue) for issue in issues_data]
+            # Collect headers to forward
+            headers_out = {}
+            etag = response.headers.get("ETag")
+            if etag:
+                etag_cache[cache_key] = etag
+                headers_out["ETag"] = etag
+
+            link = response.headers.get("Link")
+            if link:
+                headers_out["Link"] = link  # propagate GitHub pagination
+
+            # Optionally forward rate-limit headers too:
+            for h in ("X-RateLimit-Limit", "X-RateLimit-Remaining", "X-RateLimit-Reset"):
+                if h in response.headers:
+                    headers_out[h] = response.headers[h]
+
+            if headers_out:
+                return JSONResponse(content=normalized_issues, headers=headers_out)
+            else:
+                return normalized_issues
+
+        except httpx.HTTPStatusError as e:
+            await _handle_github_error(e)
 ## Authored by Akshata Madavi
 @router.get("/{number}")
 async def get_issue(number: int, request: Request):
