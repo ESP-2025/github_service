@@ -16,7 +16,11 @@ jobs:
           python -m pip install --upgrade pip
           pip install ruff
       - name: Lint with ruff
-        run: ruff check .
+        run: ruff check . --fix
+      - name: Commit changes
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: 'style: auto-fix linting issues'
 
   test:
     runs-on: ubuntu-latest
